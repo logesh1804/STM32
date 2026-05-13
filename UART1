@@ -1,0 +1,25 @@
+#include<stdio.h>
+#include<stdint.h>
+#define RCC_AHB1ENR   (*(volatile uint32_t*)0x40023830)
+#define RCC_APB1ENR  (*(volatile uint32_t*)0x40023840)
+#define GPIOA_MODER   (*(volatile uint32_t*)0x40020000)
+#define GPIOA_AFRL (*(volatile uint32_t*)0x40020020)
+#define USART_SR (*(volatile uint32_t*)0x40004400)
+#define USART_DR (*(volatile uint32_t*)0x40004404)
+#define USART_CR1(*(volatile uint32_t*)0x4000440C)
+#define USART_BRR(*(volatile uint32_t*)0x40004408)
+void main(){
+	RCC_AHB1ENR |= (1<<0);
+	RCC_APB1ENR |=(1<<17);// enb bit17 
+	GPIOA_MODER &=~(3<<4);
+	GPIOA_MODER &=~(3<<6);
+	GPIOA_MODER |=(2<<4);
+	GPIOA_MODER	|=(2<<6);
+	GPIOA_AFRL &= ~(15 << 8);    // CLEAR  PA2 
+	GPIOA_AFRL |=  (7 << 8);    // AF7 FOR PA2
+	GPIOA_AFRL &= ~(15 << 12);   // CL PA3 
+	GPIOA_AFRL |=  (7 << 12);
+	USART_CR1  &= ~(15 << 0); //CLR 
+	USART_CR1  |=(1<<13);
+	USART_CR1 |=(3<<2);
+}

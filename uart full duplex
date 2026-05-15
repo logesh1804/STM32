@@ -1,0 +1,56 @@
+#include<stdio.h>
+#include<stdint.h>
+#define RCC_AHB1ENR   (*(volatile uint32_t*)0x40023830)
+#define RCC_APB1ENR  (*(volatile uint32_t*)0x40023840)
+#define GPIOA_MODER   (*(volatile uint32_t*)0x40020000)
+#define GPIOA_AFRL (*(volatile uint32_t*)0x40020020)
+#define USART_SR (*(volatile uint32_t*)0x40004400)
+#define USART_DR (*(volatile uint32_t*)0x40004404)
+#define USART_BRR (*(volatile uint32_t*)0x40004408)
+#define USART_CR1 (*(volatile uint32_t*)0x4000440c)
+
+int main(void){
+	RCC_AHB1ENR |= (1<<0);
+	RCC_APB1ENR |=(1<<17);
+	GPIOA_MODER &=~(3<<4);
+	GPIOA_MODER &=~(3<<6);
+	GPIOA_MODER |=(2<<4);
+	GPIOA_MODER	|=(2<<6);
+	GPIOA_AFRL &= ~(15 << 8);
+	GPIOA_AFRL |=  (7 << 8);
+	GPIOA_AFRL &= ~(15 << 12);
+	GPIOA_AFRL |=(7 << 12);
+    USART_CR1  &= ~(1<<13);
+    USART_CR1 &=~(3<<2);
+	USART_CR1  |=(1<<13);
+	USART_CR1 |=(3<<2);
+	USART_CR1 &=~(1<<15);
+
+
+	USART_BRR=0x0683;
+	char rx[100];
+	char tx[100]="hello appa amma";
+	char *r=rx;
+	char *t=tx;
+
+
+	while(1){
+		while (!(USART_SR &(1<<5)));
+		*r=USART_DR;
+		r++;
+	while(!(USART_SR & (1<<7)));
+
+
+	USART_DR= *t;
+	t++;
+	if(*t == '\0')
+	    t = tx;
+	if(r >= rx + 100)
+			r = rx;
+
+
+	}
+
+}
+
+

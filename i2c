@@ -1,0 +1,69 @@
+#include<stdio.h>
+#include<stdint.h>
+
+#define RCC_AHB1ENR   (*(volatile uint32_t*)0x40023830)
+#define RCC_APB1ENR   (*(volatile uint32_t*)0x40023840)
+
+#define GPIOB_MODER   (*(volatile uint32_t*)0x40020400)
+#define GPIOB_OTYPER  (*(volatile uint32_t*)0x40020404)
+#define GPIOB_AFRH    (*(volatile uint32_t*)0x40020424)
+
+#define I2C1_CR1      (*(volatile uint32_t*)0x40005400)
+#define I2C1_CR2      (*(volatile uint32_t*)0x40005404)
+#define I2C1_DR       (*(volatile uint32_t*)0x40005410)
+#define I2C1_SR1      (*(volatile uint32_t*)0x40005414)
+#define I2C1_SR2      (*(volatile uint32_t*)0x40005418)
+#define I2C1_CCR      (*(volatile uint32_t*)0x4000541C)
+#define I2C1_TRISE    (*(volatile uint32_t*)0x40005420)
+
+int main(void){
+
+	RCC_AHB1ENR |= (1<<1);     // GPIOB clock
+	RCC_APB1ENR |= (1<<21);    // I2C1 clock
+
+	GPIOB_MODER &= ~(3<<16);
+	GPIOB_MODER &= ~(3<<18);
+
+	GPIOB_MODER |= (2<<16);
+	GPIOB_MODER |= (2<<18);
+
+	GPIOB_OTYPER |= (1<<8);
+	GPIOB_OTYPER |= (1<<9);
+
+	GPIOB_AFRH &= ~(15<<0);
+	GPIOB_AFRH |=  (4<<0);
+
+	GPIOB_AFRH &= ~(15<<4);
+	GPIOB_AFRH |=  (4<<4);
+
+	I2C1_CR1 &= ~(1<<0);
+
+	I2C1_CR2 = 16;
+
+	I2C1_CCR = 80;
+
+	I2C1_TRISE = 17;
+
+	I2C1_CR1 |= (1<<0);
+
+	while(1){
+
+		I2C1_CR1 |= (1<<8);
+
+		while(!(I2C1_SR1 & (1<<0)));
+
+		I2C1_DR = 0xA0;
+
+		while(!(I2C1_SR1 & (1<<1)));
+
+		(void)I2C1_SR2;
+
+		I2C1_DR = 'H';
+
+		while(!(I2C1_SR1 & (1<<7)));
+
+		I2C1_CR1 |= (1<<9);
+
+		for(int i=0;i<50000;i++);
+	}
+}
